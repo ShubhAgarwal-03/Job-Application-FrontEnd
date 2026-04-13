@@ -1,5 +1,4 @@
-// const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const API_BASE = "/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export const fetchAPI = async (endpoint, method = "GET", body = null, token = null) => {
   try {
@@ -12,13 +11,11 @@ export const fetchAPI = async (endpoint, method = "GET", body = null, token = nu
       ...(body && { body: JSON.stringify(body) }),
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("fetchAPI non-OK response:", res.status, text.slice(0, 200));
-      return { message: `Server error ${res.status}` };
-    }
+    const data = await res.json().catch(() => ({
+      message: `Server error ${res.status}`,
+    }));
 
-    return await res.json();
+    return data;
   } catch (err) {
     console.error("fetchAPI error:", err);
     return { message: "Network error — could not reach the server." };
